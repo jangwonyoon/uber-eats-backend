@@ -1,6 +1,6 @@
-import { InputType, Field } from '@nestjs/graphql';
+import { InputType, Field, ArgsType } from '@nestjs/graphql';
 
-@InputType()
+@ArgsType()
 export class CreateRestaurantDto {
   @Field((type) => String) name: string;
   @Field((type) => Boolean) isVegan: boolean;
