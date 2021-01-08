@@ -1,6 +1,6 @@
 import { Resolver, Args, Mutation, Query } from '@nestjs/graphql';
 import { Podcast } from './entities/podcasts.entity';
-import { CreatePodcastDto } from './dtos/create-podcasts-dto';
+import { CreatePodcastDto } from './dtos/create-podcasts.dto';
 import { Episodes } from './entities/episodes.entity';
 import { Param } from '@nestjs/common';
 
