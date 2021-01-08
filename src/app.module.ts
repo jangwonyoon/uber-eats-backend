@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import * as Joi from 'joi';
 import { GraphQLModule } from '@nestjs/graphql';
 import { RestaurantsModule } from './restaurants/restaurants.module';
 import { PodcastsModule } from './podcasts/podcasts.module';
@@ -11,6 +12,14 @@ import { ConfigModule } from '@nestjs/config';
       isGlobal: true,
       envFilePath: process.env.NODE_ENV === 'dev' ? '.env.dev' : '.env.test',
       ignoreEnvFile: process.env.NODE_ENV === 'prod',
+      validationSchema: Joi.object({
+        NODE_ENV: Joi.string().valid('dev', 'prod').required(),
+        DB_HOST: Joi.string().required(),
+        DB_PORT: Joi.string().required(),
+        DB_USERNAME: Joi.string().required(),
+        DB_PASSWORD: Joi.string().required(),
+        DB_NAME: Joi.string().required(),
+      }),
     }),
     TypeOrmModule.forRoot({
       type: 'postgres',
@@ -36,3 +45,7 @@ export class AppModule {}
 /* ignoreFile 서버에 deploy 할 때 환경변수 파일을 사용하지 않는다는 얘기 */
 
 /* String을 Number로 바꾸는 경우 +를 넣어주면 된다. */
+
+/* nestJS에서 TS가 아닌 패키지를 가져오는 방법  */
+
+/* validationSchema 환경변수 마저도 그 유효성을 확인 할 수 있다. */
