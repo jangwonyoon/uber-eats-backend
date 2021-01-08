@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { Restaurant } from './entities/restaurants.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { CreateRestaurantDto } from './dtos/create-restaurant.dto';
 
 @Injectable()
 export class RestaurantService {
@@ -11,6 +12,19 @@ export class RestaurantService {
   ) {}
   getAll(): Promise<Restaurant[]> {
     return this.restaurants.find();
+  }
+
+  createRestaurant(
+    createRestaurantDto: CreateRestaurantDto,
+  ): Promise<Restaurant> {
+    /* const newRestaurant = new Restaurant();
+    newRestaurant.name = CreateRestaurantDto.name;
+
+    TypeOrm을 사용하지 않았을 경우 
+    */
+
+    const newRestaurant = this.restaurants.create(createRestaurantDto);
+    return this.restaurants.save(newRestaurant);
   }
 }
 
