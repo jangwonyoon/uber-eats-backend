@@ -1,6 +1,6 @@
 import { ObjectType, Field, InputType } from '@nestjs/graphql';
 import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
-import { IsString, IsBoolean, Length } from 'class-validator';
+import { IsString, IsBoolean, Length, IsOptional } from 'class-validator';
 
 /* isAbstract는 이것을 어디선가 복사해서 사용한다는 뜻이다. */
 @InputType({ isAbstract: true })
@@ -17,12 +17,18 @@ export class Restaurant {
   @Length(5, 10)
   name: string;
 
-  @Field((type) => Boolean)
-  @Column()
+  @Field((type) => Boolean, {
+    nullable: true,
+    defaultValue: true,
+  }) /* graphQL Validation */
+  @Column({ default: true }) /* TypeOrm 데이터베이스 validataion */
+  @IsOptional() /* Type Validation */
   @IsBoolean()
   isVegan: boolean;
 
-  @Field((type) => String)
+  @Field((type) => String, {
+    defaultValue: 'InCheon',
+  })
   @Column()
   @IsString()
   address: string;
@@ -37,3 +43,5 @@ export class Restaurant {
   @IsString()
   categoryName: string;
 }
+
+/* IsOptional는 해당 필드를 보내거나 보내지 않을 수 있다는것을 의미한다. */
