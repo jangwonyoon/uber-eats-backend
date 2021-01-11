@@ -4,12 +4,17 @@ import { User } from './entities/user.entity';
 import { Injectable } from '@nestjs/common';
 import { CreateAccountInput } from './dtos/create-account.dto';
 import { LoginInput } from './dtos/login.dto';
+import * as jwt from 'jsonwebtoken';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User) private readonly users: Repository<User>,
-  ) {}
+    private readonly config: ConfigService,
+  ) {
+    console.log(this.config.get('SECRET_KEY'));
+  }
 
   async createAccount({
     email,
@@ -67,9 +72,16 @@ export class UsersService {
           error: 'Wrong password',
         };
       }
+      const token = jwt.sign(
+        {
+          id: user.id,
+          password: user.password,
+        },
+        this.config.get('SECRET_KEY'),
+      );
       return {
         ok: true,
-        token: 'lalalalaa',
+        token,
       };
     } catch (error) {
       return {
@@ -79,3 +91,8 @@ export class UsersService {
     }
   }
 }
+
+/* JsonWebToken이 TS가 없기 때문에 
+npm i jsonwebtoken
+npm i @types/jsonwebtoken --only-dev 도 같이 해주어야한다. 
+*/
