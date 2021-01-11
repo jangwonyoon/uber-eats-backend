@@ -14,7 +14,7 @@ export class UsersService {
     email,
     password,
     role,
-  }: CreateAccountInput): Promise<string | undefined> {
+  }: CreateAccountInput): Promise<{ ok: boolean; error?: string }> {
     // 1. check that email does not exist
     // 2. create user & hasing the password
 
@@ -24,7 +24,7 @@ export class UsersService {
       const exists = await this.users.findOne({ email });
       if (exists) {
         // make error
-        return 'There is a user with that email already';
+        return { ok: false, error: 'There is a user with that email already' };
       }
 
       // if don't exist Acoount , Make User Account
@@ -36,9 +36,10 @@ export class UsersService {
           role,
         }),
       );
+      return { ok: true };
     } catch (e) {
       // make error
-      return 'Couldnt crate Account ';
+      return { ok: false, error: 'Couldnt crate Account ' };
     }
   }
 }
