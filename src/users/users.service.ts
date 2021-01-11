@@ -10,16 +10,21 @@ export class UsersService {
     @InjectRepository(User) private readonly users: Repository<User>,
   ) {}
 
-  async createAccount({ email, password, role }: CreateAccountInput) {
+  async createAccount({
+    email,
+    password,
+    role,
+  }: CreateAccountInput): Promise<string | undefined> {
     // 1. check that email does not exist
     // 2. create user & hasing the password
 
-    /* 계정 생성 logic */
+    /* 1. 계정 생성 logic */
+
     try {
       const exists = await this.users.findOne({ email });
       if (exists) {
         // make error
-        return;
+        return 'There is a user with that email already';
       }
 
       // if don't exist Acoount , Make User Account
@@ -31,10 +36,9 @@ export class UsersService {
           role,
         }),
       );
-      return true;
     } catch (e) {
       // make error
-      return;
+      return 'Couldnt crate Account ';
     }
   }
 }
