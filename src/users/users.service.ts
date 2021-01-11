@@ -84,6 +84,10 @@ export class UsersService {
       };
     }
   }
+
+  async findById(id: number): Promise<User> {
+    return this.users.findOne({ id });
+  }
 }
 
 /* JsonWebToken이 TS가 없기 때문에 
