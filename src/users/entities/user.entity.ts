@@ -1,4 +1,4 @@
-import { Entity, Column, BeforeInsert } from 'typeorm';
+import { Entity, Column, BeforeInsert, BeforeUpdate } from 'typeorm';
 import {
   ObjectType,
   InputType,
@@ -55,6 +55,9 @@ export class User extends CoreEntity {
   */
 
   @BeforeInsert()
+
+  /* update 되기 전에 비밀번호 해쉬화  */
+  @BeforeUpdate()
   async hashPassword(): Promise<void> {
     try {
       this.password = await bcrypt.hash(this.password, 10);

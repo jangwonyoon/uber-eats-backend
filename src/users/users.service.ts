@@ -7,6 +7,7 @@ import { LoginInput } from './dtos/login.dto';
 import * as jwt from 'jsonwebtoken';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from 'src/jwt/jwt.service';
+import { EditProfileInput } from './dtos/edit-profile.dto';
 
 @Injectable()
 export class UsersService {
@@ -87,6 +88,12 @@ export class UsersService {
 
   async findById(id: number): Promise<User> {
     return this.users.findOne({ id });
+  }
+
+  async editProfile(userId: number, editProfileInput: EditProfileInput) {
+    console.log({ ...editProfileInput });
+    /* entity를 부분적으로 업데이트 할 수 있게 하는 TypeOrm이다.  */
+    return this.users.update(userId, { ...editProfileInput });
   }
 }
 
