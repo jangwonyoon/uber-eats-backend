@@ -55,7 +55,6 @@ export class User extends CoreEntity {
   */
 
   @BeforeInsert()
-
   /* update 되기 전에 비밀번호 해쉬화  */
   @BeforeUpdate()
   async hashPassword(): Promise<void> {

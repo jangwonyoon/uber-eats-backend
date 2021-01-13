@@ -90,10 +90,21 @@ export class UsersService {
     return this.users.findOne({ id });
   }
 
-  async editProfile(userId: number, editProfileInput: EditProfileInput) {
-    console.log({ ...editProfileInput });
+  async editProfile(userId: number, { email, password }: EditProfileInput) {
     /* entity를 부분적으로 업데이트 할 수 있게 하는 TypeOrm이다.  */
-    return this.users.update(userId, { ...editProfileInput });
+
+    /* TypeOrm의 update는 그저 바뀐 쿼리를 보내는것 뿐이고 DB의 쿼리를 찾아서 변경 해주지 않는다. 
+    save
+    */
+
+    const user = await this.users.findOne(userId);
+    if (email) {
+      user.email = email;
+    }
+    if (password) {
+      user.password = password;
+    }
+    return this.users.save(user);
   }
 }
 
