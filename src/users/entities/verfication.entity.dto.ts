@@ -12,7 +12,9 @@ export class Verification extends CoreEntity {
   @Field((type) => String)
   code: string;
 
-  @OneToOne((type) => User)
+  /* Cascade 연쇄로 user가 삭제 되었을 경우 verfication 또한 삭제 되도록 하는 작용 */
+
+  @OneToOne((type) => User, { onDelete: 'CASCADE' })
   @JoinColumn()
   user: User;
 

@@ -1,11 +1,9 @@
-import { Repository, TreeLevelColumn } from 'typeorm';
+import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { Injectable } from '@nestjs/common';
 import { CreateAccountInput } from './dtos/create-account.dto';
 import { LoginInput } from './dtos/login.dto';
-import * as jwt from 'jsonwebtoken';
-import { ConfigService } from '@nestjs/config';
 import { JwtService } from 'src/jwt/jwt.service';
 import { EditProfileInput } from './dtos/edit-profile.dto';
 import { Verification } from './entities/verfication.entity.dto';
@@ -67,7 +65,10 @@ export class UsersService {
     // 3. make a JWT and give it to the user
 
     try {
-      const user = await this.users.findOne({ email });
+      const user = await this.users.findOne(
+        { email },
+        { select: ['id', 'password'] },
+      );
       if (!user) {
         return {
           ok: false,
@@ -81,6 +82,7 @@ export class UsersService {
           error: 'Wrong password',
         };
       }
+      console.log(user);
       const token = this.jwtService.sign(user.id);
       return {
         ok: true,
@@ -125,26 +127,33 @@ export class UsersService {
   }
 
   async verifyEmail(code: string): Promise<boolean> {
-    /* 
+    try {
+      /* 
     #1. verification 코드를 찾는다. 
     #2. 유저의 retion을 연동해준다.
     #3. verfication 코드가 존재한다면 false로 되어 있던 코드를 true바꾼다.
     #4. user개체에 바뀐 verfication.user 저장해준다.
     */
-    const verification = await this.verification.findOne(
-      { code },
+      const verification = await this.verification.findOne(
+        { code },
 
-      /* TypeOrm의 관계에서 ID가져오기 */
-      // { loadRelationIds: true },
+        /* TypeOrm의 관계에서 ID가져오기 */
+        // { loadRelationIds: true },
 
-      /* TypeOrm의 관계에서 내용 전체 가져오기 */
-      { relations: ['user'] },
-    );
-    if (verification) {
-      verification.user.verified = true;
-      this.users.save(verification.user);
+        /* TypeOrm의 관계에서 내용 전체 가져오기 */
+        { relations: ['user'] },
+      );
+      if (verification) {
+        verification.user.verified = true;
+        console.log(verification.user);
+        this.users.save(verification.user);
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.log(error);
+      return false;
     }
-    return false;
   }
 }
 
