@@ -8,12 +8,14 @@ import * as jwt from 'jsonwebtoken';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from 'src/jwt/jwt.service';
 import { EditProfileInput } from './dtos/edit-profile.dto';
+import { Verification } from './entities/verfication.entity.dto';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User) private readonly users: Repository<User>,
-    private readonly config: ConfigService,
+    @InjectRepository(Verification)
+    private readonly verification: Repository<Verification>,
     private readonly jwtService: JwtService,
   ) {}
 
@@ -36,11 +38,17 @@ export class UsersService {
 
       // if don't exist Acoount , Make User Account
 
-      await this.users.save(
+      const user = await this.users.save(
         this.users.create({
           email,
           password,
           role,
+        }),
+      );
+
+      await this.verification.save(
+        this.verification.create({
+          user,
         }),
       );
       return { ok: true };
@@ -103,6 +111,12 @@ export class UsersService {
     const user = await this.users.findOne(userId);
     if (email) {
       user.email = email;
+      user.verified = false;
+      await this.verification.save(
+        this.verification.create({
+          user,
+        }),
+      );
     }
     if (password) {
       user.password = password;
