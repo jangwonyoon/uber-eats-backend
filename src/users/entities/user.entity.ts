@@ -47,13 +47,16 @@ export class User extends CoreEntity {
   @IsEnum(UserRole)
   role: UserRole;
 
+  @Column({ default: false })
+  @Field((type) => Boolean)
+  verified: boolean;
+
   /* https://typeorm.io/#/listeners-and-subscribers/beforeinsert 
   Password 해싱 : save하기 전 해싱을 해서 create 후 save
 
   saltorRound: default로 10 지정 
   보통 10 추천 
   */
-
   @BeforeInsert()
   /* update 되기 전에 비밀번호 해쉬화  */
   @BeforeUpdate()
