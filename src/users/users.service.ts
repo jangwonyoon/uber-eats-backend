@@ -1,4 +1,4 @@
-import { Repository } from 'typeorm';
+import { Repository, TreeLevelColumn } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { Injectable } from '@nestjs/common';
@@ -123,7 +123,32 @@ export class UsersService {
     }
     return this.users.save(user);
   }
+
+  async verifyEmail(code: string): Promise<boolean> {
+    /* 
+    #1. verification 코드를 찾는다. 
+    #2. 유저의 retion을 연동해준다.
+    #3. verfication 코드가 존재한다면 false로 되어 있던 코드를 true바꾼다.
+    #4. user개체에 바뀐 verfication.user 저장해준다.
+    */
+    const verification = await this.verification.findOne(
+      { code },
+
+      /* TypeOrm의 관계에서 ID가져오기 */
+      // { loadRelationIds: true },
+
+      /* TypeOrm의 관계에서 내용 전체 가져오기 */
+      { relations: ['user'] },
+    );
+    if (verification) {
+      verification.user.verified = true;
+      this.users.save(verification.user);
+    }
+    return false;
+  }
 }
+
+/* TypeOrm은 default로 relationship을 불러 와 주지 않는다.  */
 
 /* JsonWebToken이 TS가 없기 때문에 
 npm i jsonwebtoken

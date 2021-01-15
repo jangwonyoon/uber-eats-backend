@@ -18,6 +18,7 @@ export class Verification extends CoreEntity {
 
   @BeforeInsert()
   createCode(): void {
+    /* 랜덤 문자열 코드 생성 구문 npm i uuid */
     this.code = uuidv4();
   }
 }
