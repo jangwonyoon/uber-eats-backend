@@ -6,18 +6,15 @@ import {
 } from '@nestjs/common';
 import * as Joi from 'joi';
 import { GraphQLModule } from '@nestjs/graphql';
-import { RestaurantsModule } from './restaurants/restaurants.module';
-import { PodcastsModule } from './podcasts/podcasts.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
-import { Restaurant } from './restaurants/entities/restaurants.entity';
 import { UsersModule } from './users/users.module';
-import { CommonModule } from './common/common.module';
 import { User } from './users/entities/user.entity';
 import { JwtModule } from './jwt/jwt.module';
 import { JwtMiddleware } from './jwt/jwt.middleware';
 import { AuthModule } from './auth/auth.module';
 import { Verification } from './users/entities/verfication.entity.dto';
+import { MailModule } from './mail/mail.module';
 
 @Module({
   imports: [
@@ -33,6 +30,9 @@ import { Verification } from './users/entities/verfication.entity.dto';
         DB_PASSWORD: Joi.string().required(),
         DB_NAME: Joi.string().required(),
         PRIVATE_KEY: Joi.string().required(),
+        MAILGUN_API_KEY: Joi.string().required(),
+        MAILGUN_DOMAIN_NAME: Joi.string().required(),
+        MAILGUN_FROM_EMAIL: Joi.string().required(),
       }),
     }),
     TypeOrmModule.forRoot({
@@ -55,6 +55,11 @@ import { Verification } from './users/entities/verfication.entity.dto';
       privatekKey: process.env.PRIVATE_KEY,
     }),
     AuthModule,
+    MailModule.forRoot({
+      apikey: process.env.MAILGUN_API_KEY,
+      fromMail: process.env.MAILGUN_DOMAIN_NAME,
+      domain: process.env.MAILGUN_FROM_EMAIL,
+    }),
   ],
   controllers: [],
   providers: [],
