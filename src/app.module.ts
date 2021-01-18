@@ -54,12 +54,13 @@ import { MailModule } from './mail/mail.module';
     JwtModule.forRoot({
       privatekKey: process.env.PRIVATE_KEY,
     }),
-    AuthModule,
     MailModule.forRoot({
-      apikey: process.env.MAILGUN_API_KEY,
-      fromMail: process.env.MAILGUN_DOMAIN_NAME,
-      domain: process.env.MAILGUN_FROM_EMAIL,
+      apiKey: process.env.MAILGUN_API_KEY,
+      domain: process.env.MAILGUN_DOMAIN_NAME,
+      fromEmail: process.env.MAILGUN_FROM_EMAIL,
     }),
+    AuthModule,
+    MailModule,
   ],
   controllers: [],
   providers: [],
