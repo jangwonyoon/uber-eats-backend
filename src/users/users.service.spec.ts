@@ -12,6 +12,7 @@ const mockRepository = () => ({
   save: jest.fn(),
   create: jest.fn(),
   findOneOrFail: jest.fn(),
+  delete: jest.fn(),
 });
 
 const mockJwtService = {
@@ -144,6 +145,7 @@ describe('UsersService', () => {
         expect.any(Object),
         expect.any(Object),
       );
+
       expect(result).toEqual({
         ok: false,
         error: 'User not found',
@@ -169,6 +171,15 @@ describe('UsersService', () => {
       expect(jwtService.sign).toHaveBeenCalledTimes(1);
       expect(jwtService.sign).toHaveBeenCalledWith(expect.any(Number));
       expect(result).toEqual({ ok: true, token: 'signed-token' });
+    });
+
+    it('should fail exception', async () => {
+      usersRepository.findOne.mockRejectedValue(new Error());
+      const result = await service.login(loginArgs);
+      expect(result).toEqual({
+        ok: false,
+        error: ' login exception error',
+      });
     });
   });
 
@@ -261,7 +272,49 @@ describe('UsersService', () => {
       expect(result).toEqual({ ok: false, error: 'Could not update profile.' });
     });
   });
-  it.todo('verifyEmail');
+
+  describe('verifyEmail', () => {
+    it('should verify email', async () => {
+      const mockedVerification = {
+        user: {
+          verified: true,
+        },
+        id: 1,
+      };
+      verificationsRepository.findOne.mockResolvedValue(mockedVerification);
+
+      const result = await service.verifyEmail('');
+
+      expect(verificationsRepository.findOne).toHaveBeenCalledTimes(1);
+      expect(verificationsRepository.findOne).toHaveBeenCalledWith(
+        expect.any(Object),
+        expect.any(Object),
+      );
+
+      expect(usersRepository.save).toHaveBeenCalledTimes(1);
+      expect(usersRepository.save).toHaveBeenCalledWith(
+        mockedVerification.user,
+      );
+
+      expect(verificationsRepository.delete).toHaveBeenCalledTimes(1);
+      expect(verificationsRepository.delete).toHaveBeenCalledWith(
+        mockedVerification.id,
+      );
+      expect(result).toEqual({ ok: true });
+    });
+
+    it('should fail on verfication not found', async () => {
+      verificationsRepository.findOne.mockResolvedValue(undefined);
+      const result = await service.verifyEmail('');
+      expect(result).toEqual({ ok: false, error: 'Verification not found.' });
+    });
+
+    it('should fail exception', async () => {
+      verificationsRepository.findOne.mockResolvedValue(new Error());
+      const result = await service.verifyEmail('');
+      expect(result).toEqual({ ok: false, error: 'Could not verfiy email' });
+    });
+  });
 });
 
 /* beforeEach는 unit testing할때 사용 E2E에서는 berforeAll 사용  */
