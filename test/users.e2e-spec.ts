@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import { AppModule } from '../src/app.module';
+import { getConnection } from 'typeorm';
 
 describe('userModule (e2e)', () => {
   let app: INestApplication;
@@ -14,7 +15,10 @@ describe('userModule (e2e)', () => {
     await app.init();
   });
 
+  /* jest app 완전히 종료  */
+
   afterAll(async () => {
+    await getConnection().dropDatabase();
     app.close();
   });
 
