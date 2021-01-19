@@ -48,7 +48,6 @@ export class UsersService {
       return { ok: false, error: "Couldn't create account" };
     }
   }
-
   async login({ email, password }: LoginInput): Promise<LoginOutput> {
     // 1. find the user with the email
     // 2. check if the password is correct
@@ -87,7 +86,7 @@ export class UsersService {
 
   async findById(id: number): Promise<UserProfileOutput> {
     try {
-      const user = await this.users.findOne({ id });
+      const user = await this.users.findOneOrFail({ id });
       if (user) {
         return {
           ok: true,
