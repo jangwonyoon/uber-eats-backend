@@ -1,4 +1,4 @@
-import { Entity, Column, BeforeInsert, BeforeUpdate } from 'typeorm';
+import { Entity, Column, BeforeInsert, BeforeUpdate, OneToMany } from 'typeorm';
 import {
   ObjectType,
   InputType,
@@ -8,7 +8,8 @@ import {
 import { CoreEntity } from 'src/common/entities/core.entity';
 import * as bcrypt from 'bcrypt';
 import { InternalServerErrorException } from '@nestjs/common';
-import { IsEmail, IsEnum } from 'class-validator';
+import { IsEmail, IsEnum, IsString, IsBoolean } from 'class-validator';
+import { Restaurant } from 'src/restaurants/entities/restaurant.entity';
 
 // type UserRole = 'client' | 'owner' | 'delivery';
 
@@ -29,7 +30,7 @@ registerEnumType(UserRole, { name: 'UserRole' });
 dto와 
 
 */
-@InputType({ isAbstract: true })
+@InputType('UserInputType', { isAbstract: true })
 @ObjectType()
 @Entity()
 export class User extends CoreEntity {
@@ -40,6 +41,7 @@ export class User extends CoreEntity {
 
   @Column({ select: false })
   @Field((type) => String)
+  @IsString()
   password: string;
 
   @Column({ type: 'enum', enum: UserRole })
@@ -49,14 +51,13 @@ export class User extends CoreEntity {
 
   @Column({ default: false })
   @Field((type) => Boolean)
+  @IsBoolean()
   verified: boolean;
 
-  /* https://typeorm.io/#/listeners-and-subscribers/beforeinsert 
-  Password 해싱 : save하기 전 해싱을 해서 create 후 save
+  @Field((type) => [Restaurant])
+  @OneToMany((type) => Restaurant, (restaurant) => restaurant.owner)
+  restaurants: Restaurant[];
 
-  saltorRound: default로 10 지정 
-  보통 10 추천 
-  */
   @BeforeInsert()
   /* update 되기 전에 비밀번호 해쉬화  */
   @BeforeUpdate()
