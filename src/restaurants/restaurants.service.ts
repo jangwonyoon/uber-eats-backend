@@ -2,36 +2,50 @@ import { Injectable } from '@nestjs/common';
 import { Restaurant } from './entities/restaurant.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { CreateRestaurantDto } from './dtos/create-restaurant.dto';
-import { UpdateRestaurantDto } from './dtos/update-restaurant.dto';
+import {
+  CreateRestaurantInput,
+  CreateRestaurantOutput,
+} from './dtos/create-restaurant.dto';
+import { User } from 'src/users/entities/user.entity';
+import { Category } from './entities/category.entity';
 
 @Injectable()
 export class RestaurantService {
   constructor(
     @InjectRepository(Restaurant)
     private readonly restaurants: Repository<Restaurant>,
+    @InjectRepository(Category)
+    private readonly categories: Repository<Category>,
   ) {}
-  getAll(): Promise<Restaurant[]> {
-    return this.restaurants.find();
-  }
 
-  createRestaurant(
-    createRestaurantDto: CreateRestaurantDto,
-  ): Promise<Restaurant> {
-    /* const newRestaurant = new Restaurant();
-    newRestaurant.name = CreateRestaurantDto.name;
+  async createRestaurant(
+    owner: User,
+    createRestaurantInput: CreateRestaurantInput,
+  ): Promise<CreateRestaurantOutput> {
+    try {
+      const newRestaurant = this.restaurants.create(createRestaurantInput);
+      newRestaurant.owner = owner;
+      const categoryName = createRestaurantInput.categoryName
+        .trim()
+        .toLowerCase();
+      const categorySlug = categoryName.replace(/ /g, '-');
+      let category = await this.categories.findOne({ slug: categorySlug });
 
-    TypeOrm을 사용하지 않았을 경우 
-    */
+      if (!category) {
+        category = await this.categories.save(
+          this.categories.create({ slug: categorySlug, name: categoryName }),
+        );
+      }
 
-    const newRestaurant = this.restaurants.create(createRestaurantDto);
-    return this.restaurants.save(newRestaurant);
-  }
-
-  /* Restaurant 업데이트 */
-  updateRestaurant({ id, data }: UpdateRestaurantDto) {
-    return this.restaurants.update(id, { ...data });
+      await this.restaurants.save(newRestaurant);
+      return {
+        ok: true,
+      };
+    } catch {
+      return {
+        ok: true,
+        error: 'Could not create restaurant',
+      };
+    }
   }
 }
-
-/* find는 async method기 때문에 Promise를 걸어주어야 한다.  */
