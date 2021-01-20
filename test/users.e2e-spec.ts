@@ -249,6 +249,7 @@ describe('UserModule (e2e)', () => {
               },
             },
           } = res;
+          expect(email).toBe(testUser.email);
         });
     });
     it('should not allow logged out user', () => {
@@ -274,6 +275,64 @@ describe('UserModule (e2e)', () => {
     });
   });
 
+  describe('editProfile', () => {
+    const NEW_EMAIL = 'jangfff2@naver.com';
+    it('should change email', () => {
+      return request(app.getHttpServer())
+        .post(GRAPHQL_ENDPOINT)
+        .set('X-JWT', jwtToken)
+        .send({
+          query: `
+        mutation{
+          editProfile(input:{
+           email: "${NEW_EMAIL}"
+           password:"2333"
+         })
+           {
+             ok
+             error
+           }
+         }`,
+        })
+        .expect(200)
+        .expect((res) => {
+          const {
+            body: {
+              data: {
+                editProfile: { ok, error },
+              },
+            },
+          } = res;
+          expect(ok).toBe(true);
+          expect(error).toBe(null);
+        });
+    });
+
+    it('should have new email', () => {
+      return request(app.getHttpServer())
+        .post(GRAPHQL_ENDPOINT)
+        .set('X-JWT', jwtToken)
+        .send({
+          query: `
+            {
+              me {
+                email
+              }
+            }
+          `,
+        })
+        .expect(200)
+        .expect((res) => {
+          const {
+            body: {
+              data: {
+                me: { email },
+              },
+            },
+          } = res;
+          expect(email).toBe(NEW_EMAIL);
+        });
+    });
+  });
   it.todo('verifyEmail');
-  it.todo('editProfile');
 });
