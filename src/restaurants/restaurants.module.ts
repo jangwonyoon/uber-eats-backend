@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { RestarantResolver } from './restaurants.resolver';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Restaurant } from './entities/restaurants.entity';
+import { Restaurant } from './entities/restaurant.entity';
 import { RestaurantService } from './restaurants.service';
 
 @Module({
