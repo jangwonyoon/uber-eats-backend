@@ -1,6 +1,6 @@
 import { Resolver, Query, Mutation, Args, Context } from '@nestjs/graphql';
 import { User } from './entities/user.entity';
-import { UsersService } from './users.service';
+import { UserService } from './users.service';
 import {
   CreateAccountOutput,
   CreateAccountInput,
@@ -15,7 +15,7 @@ import { VerifyEmailOutput, VerifyEmailInput } from './dtos/verify-email.dto';
 
 @Resolver((of) => User)
 export class UsersResolver {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(private readonly usersService: UserService) {}
 
   @Mutation((returns) => CreateAccountOutput)
   async createAccount(

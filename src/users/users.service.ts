@@ -1,21 +1,21 @@
-import { Repository } from 'typeorm';
-import { InjectRepository } from '@nestjs/typeorm';
-import { User } from './entities/user.entity';
 import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import {
   CreateAccountInput,
   CreateAccountOutput,
 } from './dtos/create-account.dto';
 import { LoginInput, LoginOutput } from './dtos/login.dto';
+import { User } from './entities/user.entity';
 import { JwtService } from 'src/jwt/jwt.service';
 import { EditProfileInput, EditProfileOutput } from './dtos/edit-profile.dto';
-import { Verification } from './entities/verfication.entity.dto';
+import { Verification } from './entities/verification.entity.dto';
 import { VerifyEmailOutput } from './dtos/verify-email.dto';
 import { UserProfileOutput } from './dtos/user-profile.dto';
 import { MailService } from 'src/mail/mail.service';
 
 @Injectable()
-export class UsersService {
+export class UserService {
   constructor(
     @InjectRepository(User) private readonly users: Repository<User>,
     @InjectRepository(Verification)
@@ -48,11 +48,8 @@ export class UsersService {
       return { ok: false, error: "Couldn't create account" };
     }
   }
-  async login({ email, password }: LoginInput): Promise<LoginOutput> {
-    // 1. find the user with the email
-    // 2. check if the password is correct
-    // 3. make a JWT and give it to the user
 
+  async login({ email, password }: LoginInput): Promise<LoginOutput> {
     try {
       const user = await this.users.findOne(
         { email },
@@ -71,6 +68,7 @@ export class UsersService {
           error: 'Wrong password',
         };
       }
+
       const token = this.jwtService.sign(user.id);
       return {
         ok: true,
@@ -79,7 +77,7 @@ export class UsersService {
     } catch (error) {
       return {
         ok: false,
-        error: ' login exception error',
+        error: "Can't log user in.",
       };
     }
   }
@@ -87,12 +85,10 @@ export class UsersService {
   async findById(id: number): Promise<UserProfileOutput> {
     try {
       const user = await this.users.findOneOrFail({ id });
-      if (user) {
-        return {
-          ok: true,
-          user: user,
-        };
-      }
+      return {
+        ok: true,
+        user,
+      };
     } catch (error) {
       return { ok: false, error: 'User Not Found' };
     }
@@ -107,6 +103,7 @@ export class UsersService {
       if (email) {
         user.email = email;
         user.verified = false;
+        await this.verifications.delete({ user: { id: user.id } });
         const verification = await this.verifications.save(
           this.verifications.create({ user }),
         );
@@ -138,7 +135,7 @@ export class UsersService {
       }
       return { ok: false, error: 'Verification not found.' };
     } catch (error) {
-      return { ok: false, error: 'Could not verfiy email' };
+      return { ok: false, error: 'Could not verify email.' };
     }
   }
 }
