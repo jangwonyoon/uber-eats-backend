@@ -10,6 +10,10 @@ import { AuthUser } from 'src/auth/auth-user.decorator';
 import { Role } from 'src/auth/role.decorator';
 import { Dish } from './entities/dish.entity';
 import { CreateDishOutput, CreateDishInput } from './entities/create-dish.dto';
+import {
+  EditRestaurantOutput,
+  EditRestaurantInput,
+} from './dtos/edit-restaurant.dto';
 
 @Resolver((of) => Restaurant)
 export class RestarantResolver {
@@ -27,19 +31,30 @@ export class RestarantResolver {
       createRestaurantInput,
     );
   }
-}
 
-@Resolver((of) => Dish)
-export class DishResolver {
-  constructor(private readonly restaurantService: RestaurantService) {}
-
-  @Mutation((type) => CreateDishOutput)
+  @Mutation((returns) => EditRestaurantOutput)
   @Role(['Owner'])
-  createDish(
-    @AuthUser()
-    owner: User,
-    @Args('input') createDishInput: CreateDishInput,
-  ) {
-    return this.restaurantService.createDish(owner, createDishInput);
+  editRestaurant(
+    @AuthUser() authUser: User,
+    @Args('input') editRestaurant: EditRestaurantInput,
+  ): EditRestaurantOutput {
+    return {
+      ok: true,
+    };
   }
 }
+
+// @Resolver((of) => Dish)
+// export class DishResolver {
+//   constructor(private readonly restaurantService: RestaurantService) {}
+
+//   @Mutation((type) => CreateDishOutput)
+//   @Role(['Owner'])
+//   createDish(
+//     @AuthUser()
+//     owner: User,
+//     @Args('input') createDishInput: CreateDishInput,
+//   ) {
+//     return this.restaurantService.createDish(owner, createDishInput);
+//   }
+// }
