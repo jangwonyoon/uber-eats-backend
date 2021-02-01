@@ -1,29 +1,40 @@
-import { Resolver, Args, Mutation } from '@nestjs/graphql';
-import { Restaurant } from './entities/restaurant.entity';
+import {
+  Args,
+  Int,
+  Mutation,
+  Parent,
+  Query,
+  ResolveField,
+  Resolver,
+} from '@nestjs/graphql';
+import { AuthUser } from 'src/auth/auth-user.decorator';
+import { Role } from 'src/auth/role.decorator';
+import { User, UserRole } from 'src/users/entities/user.entity';
+import { AllCategoriesOutput } from './dtos/all-categories.dto';
 import {
   CreateRestaurantInput,
   CreateRestaurantOutput,
 } from './dtos/create-restaurant.dto';
-import { RestaurantService } from './restaurants.service';
-import { User } from 'src/users/entities/user.entity';
-import { AuthUser } from 'src/auth/auth-user.decorator';
-import { Role } from 'src/auth/role.decorator';
-import { Dish } from './entities/dish.entity';
-import { CreateDishOutput, CreateDishInput } from './entities/create-dish.dto';
 import {
-  EditRestaurantOutput,
+  DeleteRestaurantInput,
+  DeleteRestaurantOutput,
+} from './dtos/delete-restaurant.dto';
+import {
   EditRestaurantInput,
+  EditRestaurantOutput,
 } from './dtos/edit-restaurant.dto';
+import { Category } from './entities/category.entity';
+import { Restaurant } from './entities/restaurant.entity';
+import { RestaurantService } from './restaurants.service';
 
 @Resolver((of) => Restaurant)
-export class RestarantResolver {
+export class RestaurantResolver {
   constructor(private readonly restaurantService: RestaurantService) {}
 
-  @Mutation((_) => CreateRestaurantOutput)
+  @Mutation((returns) => CreateRestaurantOutput)
   @Role(['Owner'])
-  async createRestaraurant(
-    @AuthUser()
-    authUser: User,
+  async createRestaurant(
+    @AuthUser() authUser: User,
     @Args('input') createRestaurantInput: CreateRestaurantInput,
   ): Promise<CreateRestaurantOutput> {
     return this.restaurantService.createRestaurant(
@@ -39,6 +50,33 @@ export class RestarantResolver {
     @Args('input') editRestaurantInput: EditRestaurantInput,
   ): Promise<EditRestaurantOutput> {
     return this.restaurantService.editRestaurant(owner, editRestaurantInput);
+  }
+
+  @Mutation((returns) => DeleteRestaurantOutput)
+  @Role(['Owner'])
+  deleteRestaurant(
+    @AuthUser() owner: User,
+    @Args('input') deleteRestaurantInput: DeleteRestaurantInput,
+  ): Promise<DeleteRestaurantOutput> {
+    return this.restaurantService.deleteRestaurant(
+      owner,
+      deleteRestaurantInput,
+    );
+  }
+}
+
+@Resolver((of) => Category)
+export class CategoryResolver {
+  constructor(private readonly restarantService: RestaurantService) {}
+
+  @ResolveField((type) => Int)
+  restaurantCount(@Parent() category: Category): Promise<number> {
+    return this.restarantService.countRestaurants(category);
+  }
+
+  @Query((returns) => AllCategoriesOutput)
+  allCategories(): Promise<AllCategoriesOutput> {
+    return this.restarantService.allCategories();
   }
 }
 
